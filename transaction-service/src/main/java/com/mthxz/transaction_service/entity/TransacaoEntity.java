@@ -7,6 +7,9 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.IdGeneratorType;
+import org.hibernate.id.UUIDGenerator;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -21,7 +24,8 @@ import java.util.UUID;
 public class TransacaoEntity {
 
     @Id
-    @Column(name = "id", nullable = false, updatable = false)
+    @GeneratedValue
+    @Column(name = "id", updatable = false, nullable = false)
     private UUID id;
 
     @Enumerated(EnumType.STRING)

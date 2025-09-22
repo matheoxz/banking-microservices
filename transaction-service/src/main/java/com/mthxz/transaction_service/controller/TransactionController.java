@@ -16,14 +16,10 @@ public class TransactionController {
     private final NewTransactionService newTransactionService;
 
     @PostMapping("/solicitar")
-    public ResponseEntity<Boolean> solicitar(@RequestBody SolicitacaoTransacaoModel solicitacao) {
-        try {
-            boolean ok = newTransactionService.solicitaTransacao(new TransacaoRequestModel(
-                    solicitacao.getTipo(), solicitacao.getValor(), solicitacao.getOrigem(), solicitacao.getDestino()
-            ));
-            return ResponseEntity.ok(ok);
-        } catch (Exception e) {
-            return ResponseEntity.internalServerError().body(false);
-        }
+    public ResponseEntity<Void> solicitar(@RequestBody SolicitacaoTransacaoModel solicitacao) {
+        var ok = newTransactionService.solicitaTransacao(new TransacaoRequestModel(
+                solicitacao.getTipo(), solicitacao.getValor(), solicitacao.getOrigem(), solicitacao.getDestino()
+        ));
+        return ok ? ResponseEntity.ok().build() : ResponseEntity.internalServerError().build();
     }
 }
