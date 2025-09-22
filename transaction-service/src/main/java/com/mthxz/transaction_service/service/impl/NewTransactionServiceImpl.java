@@ -1,21 +1,25 @@
 package com.mthxz.transaction_service.service.impl;
 
 import com.mthxz.transaction_service.config.KafkaConfig;
+import com.mthxz.transaction_service.entity.ContaEntity;
 import com.mthxz.transaction_service.entity.TransacaoEntity;
 import com.mthxz.transaction_service.model.*;
+import com.mthxz.transaction_service.repository.ContaRepository;
 import com.mthxz.transaction_service.repository.TransacaoRepository;
 import com.mthxz.transaction_service.service.NewTransactionService;
 import com.mthxz.transaction_service.transaction.TransactionHandler;
 import com.mthxz.transaction_service.transaction.TransacaoFactory;
+import com.mthxz.transaction_service.validation.TransactionValidations;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataAccessException;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
 
 @Service
 @Slf4j
@@ -25,77 +29,55 @@ public class NewTransactionServiceImpl implements NewTransactionService {
     private final TransacaoRepository transacaoRepository;
     private final KafkaTemplate<String, Object> kafkaTemplate;
     private final TransacaoFactory transacaoFactory;
-    private final StubAccountService accountService = new StubAccountService();
+    private final ContaRepository contaRepository;
+    private final TransactionValidations transactionValidations;
 
     @Override
     @Transactional
     public boolean solicitaTransacao(TransacaoRequestModel transacao) {
-        UUID id = UUID.randomUUID();
-        TransacaoEntity entity = TransacaoEntity.builder()
-                .id(id)
-                .tipo(transacao.getTipo())
-                .valor(transacao.getValor())
-                .origem(transacao.getOrigem())
-                .destino(transacao.getDestino())
-                .status(StatusTransacao.PENDENTE)
-                .build();
         try {
-            transacaoRepository.save(entity);
-        } catch (Exception e) {
+            var entity = TransacaoEntity.builder()
+                    .tipo(transacao.getTipo())
+                    .valor(transacao.getValor())
+                    .origem(transacao.getOrigem())
+                    .destino(transacao.getDestino())
+                    .status(StatusTransacao.PENDENTE)
+                    .build();
+
+            var savedTransaction = transacaoRepository.save(entity);
+
+            var exec = new ExecucaoTransacaoModel(savedTransaction.getId(), entity.getOrigem(), entity.getDestino());
+
+            kafkaTemplate.send(KafkaConfig.TOPIC_TRANSACAO_SOLICITADA, exec).get();
+        } catch (DataAccessException e) {
             log.error("[ERROR] [DATABASE] error: {}", e.getMessage());
             return false;
-        }
-
-        ExecucaoTransacaoModel exec = new ExecucaoTransacaoModel(id, entity.getOrigem(), entity.getDestino());
-        try {
-            // ensure send success or rollback save
-            kafkaTemplate.send(KafkaConfig.TOPIC_TRANSACAO_SOLICITADA, exec).get();
-        } catch (Exception e) {
-            log.error("Falha ao publicar na fila TransacaoSolicitada uuid={}", id);
-            // rethrow to force transaction rollback (so it won't be double-saved on retry)
-            throw new RuntimeException("Kafka publish failed", e);
+        } catch (ExecutionException | InterruptedException e) {
+            log.error("[ERROR] [KAFKA] error: {}", e.getMessage());
+            return false;
         }
         return true;
     }
 
     @Override
     public void executaTransacao(ExecucaoTransacaoModel executaTransacao) {
-        UUID id = executaTransacao.getTransacao();
-        Optional<TransacaoEntity> opt = transacaoRepository.findById(id);
+        var id = executaTransacao.getTransacao();
+        var opt = transacaoRepository.findById(id);
         if (opt.isEmpty()) {
-            log.warn("Transacao nao existe na base de dados uuids:{}", id);
-            ConclusaoTransacaoModel concl = new ConclusaoTransacaoModel(executaTransacao, StatusTransacao.FALHOU,
+            log.warn("m=executaTransacao Transacao nao existe na base de dados uuid:{}", id);
+            var concl = new ConclusaoTransacaoModel(executaTransacao, StatusTransacao.FALHOU,
                     "Transacao nao existe na base de dados uuids:" + id);
             kafkaTemplate.send(KafkaConfig.TOPIC_TRANSACAO_CONCLUIDA, concl);
             return;
         }
         TransacaoEntity entity = opt.get();
 
-        // Check origin and destination existence (stubbed)
-        boolean origemExiste = accountService.exists(entity.getOrigem());
-        boolean destinoExiste = accountService.exists(entity.getDestino());
-        if (!origemExiste) {
-            ConclusaoTransacaoModel concl = new ConclusaoTransacaoModel(executaTransacao, StatusTransacao.FALHOU,
-                    "Origem nao existe na base de dados uuids: " + entity.getOrigem());
+        // Validations via chain of responsibility
+        var validationResult = transactionValidations.validate(entity, executaTransacao);
+        if (validationResult.isPresent()) {
+            ConclusaoTransacaoModel concl = validationResult.get();
             kafkaTemplate.send(KafkaConfig.TOPIC_TRANSACAO_CONCLUIDA, concl);
-            transacaoRepository.save(updateStatus(entity, StatusTransacao.FALHOU, concl.getDetalhes()));
-            return;
-        }
-        if (!destinoExiste) {
-            ConclusaoTransacaoModel concl = new ConclusaoTransacaoModel(executaTransacao, StatusTransacao.FALHOU,
-                    "Destino nao existe na base dados uuids:" + entity.getDestino());
-            kafkaTemplate.send(KafkaConfig.TOPIC_TRANSACAO_CONCLUIDA, concl);
-            transacaoRepository.save(updateStatus(entity, StatusTransacao.FALHOU, concl.getDetalhes()));
-            return;
-        }
-
-        // Check saldo (stubbed)
-        BigDecimal saldoOrigem = accountService.getSaldo(entity.getOrigem());
-        if (entity.getValor().compareTo(saldoOrigem) > 0) {
-            ConclusaoTransacaoModel concl = new ConclusaoTransacaoModel(executaTransacao, StatusTransacao.CANCELADA,
-                    "Transacao com valor maior que saldo");
-            kafkaTemplate.send(KafkaConfig.TOPIC_TRANSACAO_CONCLUIDA, concl);
-            transacaoRepository.save(updateStatus(entity, StatusTransacao.CANCELADA, concl.getDetalhes()));
+            transacaoRepository.save(updateStatus(entity, concl.getStatus(), concl.getDetalhes()));
             return;
         }
 
@@ -115,13 +97,5 @@ public class NewTransactionServiceImpl implements NewTransactionService {
     private TransacaoEntity updateStatus(TransacaoEntity entity, StatusTransacao status, String detalhes) {
         entity.setStatus(status);
         return entity;
-    }
-
-    /**
-     * Stubbed account service to simulate account existence and balance.
-     */
-    static class StubAccountService {
-        boolean exists(UUID id) { return true; }
-        BigDecimal getSaldo(UUID id) { return BigDecimal.valueOf(1_000_000); }
     }
 }
