@@ -4,7 +4,6 @@ import com.mthxz.transaction_service.entity.TransacaoEntity;
 import com.mthxz.transaction_service.model.ConclusaoTransacaoModel;
 import com.mthxz.transaction_service.model.ExecucaoTransacaoModel;
 import lombok.RequiredArgsConstructor;
-import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 import java.util.List;

@@ -1,14 +1,16 @@
 package com.mthxz.transaction_service.service.impl;
 
 import com.mthxz.transaction_service.config.KafkaConfig;
-import com.mthxz.transaction_service.entity.ContaEntity;
 import com.mthxz.transaction_service.entity.TransacaoEntity;
-import com.mthxz.transaction_service.model.*;
+import com.mthxz.transaction_service.model.ConclusaoTransacaoModel;
+import com.mthxz.transaction_service.model.ExecucaoTransacaoModel;
+import com.mthxz.transaction_service.model.StatusTransacao;
+import com.mthxz.transaction_service.model.TransacaoRequestModel;
 import com.mthxz.transaction_service.repository.ContaRepository;
 import com.mthxz.transaction_service.repository.TransacaoRepository;
 import com.mthxz.transaction_service.service.NewTransactionService;
-import com.mthxz.transaction_service.transaction.TransactionHandler;
 import com.mthxz.transaction_service.transaction.TransacaoFactory;
+import com.mthxz.transaction_service.transaction.TransactionHandler;
 import com.mthxz.transaction_service.validation.TransactionValidations;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,8 +19,6 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
-import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 
 @Service
@@ -29,7 +29,6 @@ public class NewTransactionServiceImpl implements NewTransactionService {
     private final TransacaoRepository transacaoRepository;
     private final KafkaTemplate<String, Object> kafkaTemplate;
     private final TransacaoFactory transacaoFactory;
-    private final ContaRepository contaRepository;
     private final TransactionValidations transactionValidations;
 
     @Override
@@ -77,7 +76,7 @@ public class NewTransactionServiceImpl implements NewTransactionService {
         if (validationResult.isPresent()) {
             ConclusaoTransacaoModel concl = validationResult.get();
             kafkaTemplate.send(KafkaConfig.TOPIC_TRANSACAO_CONCLUIDA, concl);
-            transacaoRepository.save(updateStatus(entity, concl.getStatus(), concl.getDetalhes()));
+            transacaoRepository.save(updateStatus(entity, concl.getStatus()));
             return;
         }
 
@@ -88,13 +87,12 @@ public class NewTransactionServiceImpl implements NewTransactionService {
         TransactionHandler handler = transacaoFactory.getHandler(entity.getTipo());
         StatusTransacao result = handler.efetuar(executaTransacao);
 
-        ConclusaoTransacaoModel concl = new ConclusaoTransacaoModel(executaTransacao, result, null);
+        ConclusaoTransacaoModel concl = new ConclusaoTransacaoModel(executaTransacao, result, "Transação efetuada com sucesso!");
         kafkaTemplate.send(KafkaConfig.TOPIC_TRANSACAO_CONCLUIDA, concl);
-        transacaoRepository.save(updateStatus(entity, result, null));
-        return;
+        transacaoRepository.save(updateStatus(entity, result));
     }
 
-    private TransacaoEntity updateStatus(TransacaoEntity entity, StatusTransacao status, String detalhes) {
+    private TransacaoEntity updateStatus(TransacaoEntity entity, StatusTransacao status) {
         entity.setStatus(status);
         return entity;
     }
