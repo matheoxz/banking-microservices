@@ -14,7 +14,12 @@ spec:
     spec:
       containers:
       - name: zookeeper
-        image: wurstmeister/zookeeper:3.4.6
+        image: confluentinc/cp-zookeeper:7.6.1
+        env:
+        - name: ZOOKEEPER_CLIENT_PORT
+          value: "2181"
+        - name: ZOOKEEPER_TICK_TIME
+          value: "2000"
         ports:
         - containerPort: 2181
 ---
