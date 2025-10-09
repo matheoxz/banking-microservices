@@ -1,15 +1,13 @@
 package com.mthxz.account_service.messaging;
 
+import com.mthxz.account_service.service.ContaService;
+import com.mthxz.bankcommons.model.TransacaoConcluidaModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mthxz.bankcommons.model.TransacaoConcluidaModel;
-import com.mthxz.account_service.service.ContaService;
 
 @Component
 public class TransacaoConcluidaListener {
