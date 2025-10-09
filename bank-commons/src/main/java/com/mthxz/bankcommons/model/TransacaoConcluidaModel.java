@@ -11,6 +11,9 @@ public class TransacaoConcluidaModel {
     private StatusTransacao status;
     private String detalhes;
 
+    public TransacaoConcluidaModel(UUID transacao, UUID origem, UUID destino, StatusTransacao statusTransacao, String s) {
+    }
+
     public java.util.UUID getTransacao() {
         return transacao;
     }
