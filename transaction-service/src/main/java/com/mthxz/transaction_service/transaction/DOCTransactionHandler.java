@@ -2,13 +2,10 @@ package com.mthxz.transaction_service.transaction;
 
 import com.mthxz.bankcommons.enums.StatusTransacao;
 import com.mthxz.bankcommons.model.ExecucaoTransacaoModel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.concurrent.ThreadLocalRandom;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class DOCTransactionHandler implements TransactionHandler {
     private static final Logger log = LoggerFactory.getLogger(DOCTransactionHandler.class);

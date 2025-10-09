@@ -10,7 +10,7 @@ public class TransacaoConcluidaModel {
     private UUID destino;
     private StatusTransacao status;
     private String detalhes;
-    // Explicit getters to ensure availability without Lombok processing
+
     public java.util.UUID getTransacao() {
         return transacao;
     }
@@ -30,24 +30,30 @@ public class TransacaoConcluidaModel {
     public String getDetalhes() {
         return detalhes;
     }
-    
-    // Default constructor for Jackson deserialization
-    public TransacaoConcluidaModel() {
-    }
-    // Explicit all-args constructor
-    public TransacaoConcluidaModel(UUID transacao, UUID origem, UUID destino, StatusTransacao status, String detalhes) {
+
+    public TransacaoConcluidaModel setTransacao(UUID transacao) {
         this.transacao = transacao;
-        this.origem = origem;
-        this.destino = destino;
-        this.status = status;
-        this.detalhes = detalhes;
+        return this;
     }
-    
-    // Explicit setters
-    public void setTransacao(UUID transacao) { this.transacao = transacao; }
-    public void setOrigem(UUID origem) { this.origem = origem; }
-    public void setDestino(UUID destino) { this.destino = destino; }
-    public void setStatus(StatusTransacao status) { this.status = status; }
-    public void setDetalhes(String detalhes) { this.detalhes = detalhes; }
+
+    public TransacaoConcluidaModel setOrigem(UUID origem) {
+        this.origem = origem;
+        return this;
+    }
+
+    public TransacaoConcluidaModel setDestino(UUID destino) {
+        this.destino = destino;
+        return this;
+    }
+
+    public TransacaoConcluidaModel setStatus(StatusTransacao status) {
+        this.status = status;
+        return this;
+    }
+
+    public TransacaoConcluidaModel setDetalhes(String detalhes) {
+        this.detalhes = detalhes;
+        return this;
+    }
 }
 
