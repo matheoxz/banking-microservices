@@ -3,13 +3,8 @@ package com.mthxz.account_service.model;
 import java.math.BigDecimal;
 import java.util.UUID;
 
-import com.mthxz.account_service.enums.TipoConta;
+import com.mthxz.bankcommons.enums.TipoConta;
 
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
-@Data
-@NoArgsConstructor
 public class ContaModel {
     private UUID id;
     private String numero;
@@ -17,6 +12,48 @@ public class ContaModel {
     private TipoConta tipo;
     private BigDecimal saldo;
 
-    // default constructor provided by Lombok
-}
+    public UUID getId() {
+        return id;
+    }
 
+    public ContaModel setId(UUID id) {
+        this.id = id;
+        return this;
+    }
+
+    public String getNumero() {
+        return numero;
+    }
+
+    public ContaModel setNumero(String numero) {
+        this.numero = numero;
+        return this;
+    }
+
+    public String getAgencia() {
+        return agencia;
+    }
+
+    public ContaModel setAgencia(String agencia) {
+        this.agencia = agencia;
+        return this;
+    }
+
+    public TipoConta getTipo() {
+        return tipo;
+    }
+
+    public ContaModel setTipo(TipoConta tipo) {
+        this.tipo = tipo;
+        return this;
+    }
+
+    public BigDecimal getSaldo() {
+        return saldo;
+    }
+
+    public ContaModel setSaldo(BigDecimal saldo) {
+        this.saldo = saldo;
+        return this;
+    }
+}

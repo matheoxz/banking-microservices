@@ -8,7 +8,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mthxz.account_service.model.TransacaoConcluidaModel;
+import com.mthxz.bankcommons.model.TransacaoConcluidaModel;
 import com.mthxz.account_service.service.ContaService;
 
 @Component
@@ -19,19 +19,16 @@ public class TransacaoConcluidaListener {
     @Autowired
     private ContaService contaService;
 
-    @Autowired
-    private ObjectMapper objectMapper;
+    // ...existing code...
 
     @Async
     @KafkaListener(topics = "TransacaoConcluida", groupId = "account-service-group")
-    public void listen(String message) {
+    public void listen(TransacaoConcluidaModel model) {
+        logger.info("Received TransacaoConcluida message: {}", model.getTransacao());
         try {
-            TransacaoConcluidaModel model = objectMapper.readValue(message, TransacaoConcluidaModel.class);
-            logger.info("Received TransacaoConcluida message: {}", model.getTransacao());
             contaService.executeTransaction(model);
         } catch (Exception e) {
             logger.error("Failed to process TransacaoConcluida message", e);
         }
     }
 }
-

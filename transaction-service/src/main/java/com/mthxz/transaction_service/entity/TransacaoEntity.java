@@ -1,12 +1,8 @@
 package com.mthxz.transaction_service.entity;
 
-import com.mthxz.transaction_service.model.StatusTransacao;
-import com.mthxz.transaction_service.model.TipoTransacao;
+import com.mthxz.bankcommons.enums.StatusTransacao;
+import com.mthxz.bankcommons.enums.TipoTransacao;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -14,10 +10,6 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "transacao")
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
 public class TransacaoEntity {
 
     @Id
@@ -44,4 +36,67 @@ public class TransacaoEntity {
 
     @Column(name = "destino")
     private UUID destino;
+
+    public UUID getId() {
+        return id;
+    }
+
+    public TransacaoEntity setId(UUID id) {
+        this.id = id;
+        return this;
+    }
+
+    public TipoTransacao getTipo() {
+        return tipo;
+    }
+
+    public TransacaoEntity setTipo(TipoTransacao tipo) {
+        this.tipo = tipo;
+        return this;
+    }
+
+    public BigDecimal getValor() {
+        return valor;
+    }
+
+    public TransacaoEntity setValor(BigDecimal valor) {
+        this.valor = valor;
+        return this;
+    }
+
+    public LocalDateTime getData() {
+        return data;
+    }
+
+    public TransacaoEntity setData(LocalDateTime data) {
+        this.data = data;
+        return this;
+    }
+
+    public StatusTransacao getStatus() {
+        return status;
+    }
+
+    public TransacaoEntity setStatus(StatusTransacao status) {
+        this.status = status;
+        return this;
+    }
+
+    public UUID getOrigem() {
+        return origem;
+    }
+
+    public TransacaoEntity setOrigem(UUID origem) {
+        this.origem = origem;
+        return this;
+    }
+
+    public UUID getDestino() {
+        return destino;
+    }
+
+    public TransacaoEntity setDestino(UUID destino) {
+        this.destino = destino;
+        return this;
+    }
 }

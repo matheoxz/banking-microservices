@@ -4,18 +4,12 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.util.UUID;
 
 @Entity
 @Table(name = "conta")
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
 public class ContaEntity {
 
     @Id
@@ -24,4 +18,22 @@ public class ContaEntity {
 
     @Column(name = "saldo", nullable = false, precision = 15, scale = 2)
     private BigDecimal saldo;
+
+    public UUID getId() {
+        return id;
+    }
+
+    public ContaEntity setId(UUID id) {
+        this.id = id;
+        return this;
+    }
+
+    public BigDecimal getSaldo() {
+        return saldo;
+    }
+
+    public ContaEntity setSaldo(BigDecimal saldo) {
+        this.saldo = saldo;
+        return this;
+    }
 }

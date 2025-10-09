@@ -1,8 +1,8 @@
 package com.mthxz.account_service.service;
 
 import com.mthxz.account_service.entity.ContaEntity;
-import com.mthxz.account_service.enums.TipoConta;
-import com.mthxz.account_service.model.TransacaoConcluidaModel;
+import com.mthxz.bankcommons.enums.TipoConta;
+import com.mthxz.bankcommons.model.TransacaoConcluidaModel;
 
 import java.util.UUID;
 

@@ -1,12 +1,13 @@
 package com.mthxz.account_service.service.impl;
 
 import com.mthxz.account_service.entity.ContaEntity;
-import com.mthxz.account_service.enums.StatusTransacao;
-import com.mthxz.account_service.enums.TipoConta;
-import com.mthxz.account_service.model.TransacaoConcluidaModel;
+import com.mthxz.account_service.entity.TransacaoEntity;
 import com.mthxz.account_service.repository.ContaRepository;
 import com.mthxz.account_service.repository.TransacaoRepository;
 import com.mthxz.account_service.service.ContaService;
+import com.mthxz.bankcommons.enums.StatusTransacao;
+import com.mthxz.bankcommons.enums.TipoConta;
+import com.mthxz.bankcommons.model.TransacaoConcluidaModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,38 +30,53 @@ public class ContaServiceImpl implements ContaService {
 
     @Override
     public ContaEntity createNewAccount(UUID clienteId, TipoConta tipoConta) {
+        logger.info("Creating new account for client={} type={}", clienteId, tipoConta);
         ContaEntity conta = new ContaEntity();
-        conta.setId(UUID.randomUUID());
-        conta.setNumero(UUID.randomUUID().toString().substring(0, 10));
+        // Do NOT set the ID manually; let Hibernate generate it to ensure an insert occurs
+        conta.setClienteId(clienteId);
+        conta.setNumero(UUID.randomUUID().toString().replace("-", "").substring(0, 10));
         conta.setAgencia("0001");
         conta.setTipo(tipoConta);
         conta.setSaldo(BigDecimal.ZERO);
+        logger.debug("New account details: {}", conta);
         return contaRepository.save(conta);
     }
 
     @Override
     public void executeTransaction(TransacaoConcluidaModel model) {
+        logger.info("Starting execution of transaction={} status={} origin={} destination={}",
+                model.getTransacao(), model.getStatus(), model.getOrigem(), model.getDestino());
         if (model.getStatus() == StatusTransacao.CONFIRMADA) {
             Optional<ContaEntity> origem = contaRepository.findById(model.getOrigem());
             Optional<ContaEntity> destino = contaRepository.findById(model.getDestino());
+
+            if (origem.isEmpty()) {
+                logger.warn("Origin account {} not found for transaction {}", model.getOrigem(), model.getTransacao());
+            }
+            if (destino.isEmpty()) {
+                logger.warn("Destination account {} not found for transaction {}", model.getDestino(), model.getTransacao());
+            }
 
             if (origem.isPresent() && destino.isPresent()) {
                 ContaEntity contaOrigem = origem.get();
                 ContaEntity contaDestino = destino.get();
 
-                // Assuming transaction value is fetched from the database
+                logger.debug("Balances before transaction: origin={} balance={} | destination={} balance={}",
+                        contaOrigem.getId(), contaOrigem.getSaldo(), contaDestino.getId(), contaDestino.getSaldo());
                 BigDecimal valor = transacaoRepository.findById(model.getTransacao())
-                        .map(transacao -> new BigDecimal(transacao.getDetalhes()))
+                        .map(TransacaoEntity::getValor)
                         .orElse(BigDecimal.ZERO);
 
                 contaOrigem.setSaldo(contaOrigem.getSaldo().subtract(valor));
                 contaDestino.setSaldo(contaDestino.getSaldo().add(valor));
 
-                contaRepository.save(contaOrigem);
-                contaRepository.save(contaDestino);
+                ContaEntity updatedOrigem = contaRepository.save(contaOrigem);
+                ContaEntity updatedDestino = contaRepository.save(contaDestino);
+                logger.info("Transaction {} applied: origin new balance={} | destination new balance={}",
+                        model.getTransacao(), updatedOrigem.getSaldo(), updatedDestino.getSaldo());
             }
         } else {
-            logger.info("Transaction {} not confirmed. Status: {}", model.getTransacao(), model.getStatus());
+            logger.info("Skipping transaction {}. Status not confirmed: {}", model.getTransacao(), model.getStatus());
         }
     }
 }
