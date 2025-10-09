@@ -1,11 +1,11 @@
 package com.mthxz.account_service.service.impl;
 
 import com.mthxz.account_service.entity.ClienteEntity;
-import com.mthxz.account_service.enums.TipoConta;
 import com.mthxz.account_service.model.ClienteModel;
 import com.mthxz.account_service.repository.ClienteRepository;
 import com.mthxz.account_service.service.ContaService;
 import com.mthxz.account_service.service.RegistroClienteService;
+import com.mthxz.bankcommons.enums.TipoConta;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -32,7 +32,7 @@ public class RegistroClienteServiceImpl implements RegistroClienteService {
         }
 
         ClienteEntity clienteEntity = new ClienteEntity();
-        clienteEntity.setId(UUID.randomUUID());
+        // Let Hibernate generate the UUID id; do not set it manually to avoid unsaved-value issues
         clienteEntity.setNome(clienteModel.getNome());
         clienteEntity.setCpf(clienteModel.getCpf());
         clienteEntity.setEmail(clienteModel.getEmail());

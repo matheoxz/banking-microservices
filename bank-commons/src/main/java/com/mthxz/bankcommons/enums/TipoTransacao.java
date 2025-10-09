@@ -1,4 +1,4 @@
-package com.mthxz.transaction_service.model;
+package com.mthxz.bankcommons.enums;
 
 public enum TipoTransacao {
     PIX,

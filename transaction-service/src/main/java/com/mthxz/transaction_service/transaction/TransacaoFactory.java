@@ -1,11 +1,9 @@
 package com.mthxz.transaction_service.transaction;
 
-import com.mthxz.transaction_service.model.TipoTransacao;
-import lombok.RequiredArgsConstructor;
+import com.mthxz.bankcommons.enums.TipoTransacao;
 import org.springframework.stereotype.Component;
 
 @Component
-@RequiredArgsConstructor
 public class TransacaoFactory {
 
     public TransactionHandler getHandler(TipoTransacao tipo) {

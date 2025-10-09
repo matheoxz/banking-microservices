@@ -1,20 +1,23 @@
 package com.mthxz.transaction_service.messaging;
 
+import com.mthxz.bankcommons.model.ExecucaoTransacaoModel;
 import com.mthxz.transaction_service.config.KafkaConfig;
-import com.mthxz.transaction_service.model.ExecucaoTransacaoModel;
 import com.mthxz.transaction_service.service.NewTransactionService;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.scheduling.annotation.Async;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 @Component
-@RequiredArgsConstructor
-@Slf4j
 public class TransacaoSolicitadaListener {
+    private static final Logger log = LoggerFactory.getLogger(TransacaoSolicitadaListener.class);
 
     private final NewTransactionService newTransactionService;
+
+    public TransacaoSolicitadaListener(NewTransactionService newTransactionService) {
+        this.newTransactionService = newTransactionService;
+    }
 
     @KafkaListener(topics = KafkaConfig.TOPIC_TRANSACAO_SOLICITADA, containerFactory = "execucaoKafkaListenerContainerFactory")
     public void onSolicitada(ExecucaoTransacaoModel execucao) {
