@@ -21,8 +21,8 @@ public class KafkaConfig {
     @Value("${spring.kafka.bootstrap-servers}")
     private String bootstrapServers;
 
-    public static final String TOPIC_CLIENTE_NOTIFICATIONS = "cliente-notifications";
-    public static final String TOPIC_TRANSACTION_NOTIFICATIONS = "transaction-notifications";
+    public static final String TOPIC_TRANSACAO_SOLICITADA = "TransacaoSolicitada";
+    public static final String TOPIC_TRANSACAO_CONCLUIDA  = "TransacaoConcluida";
 
     @Bean
     public ProducerFactory<String, Object> producerFactory() {
@@ -57,13 +57,13 @@ public class KafkaConfig {
     }
 
     @Bean
-    public NewTopic clienteNotificationsTopic() {
-        return new NewTopic(TOPIC_CLIENTE_NOTIFICATIONS, 1, (short) 1);
+    public NewTopic transacaoSolicitadaTopic() {
+        return new NewTopic(TOPIC_TRANSACAO_SOLICITADA, 1, (short) 1);
     }
 
     @Bean
-    public NewTopic transactionNotificationsTopic() {
-        return new NewTopic(TOPIC_TRANSACTION_NOTIFICATIONS, 1, (short) 1);
+    public NewTopic transacaoConcluidaTopic() {
+        return new NewTopic(TOPIC_TRANSACAO_CONCLUIDA, 1, (short) 1);
     }
 }
 

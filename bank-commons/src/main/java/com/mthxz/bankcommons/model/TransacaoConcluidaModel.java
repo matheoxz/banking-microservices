@@ -14,6 +14,8 @@ public class TransacaoConcluidaModel {
     public TransacaoConcluidaModel(UUID transacao, UUID origem, UUID destino, StatusTransacao statusTransacao, String s) {
     }
 
+    public TransacaoConcluidaModel() {}
+
     public java.util.UUID getTransacao() {
         return transacao;
     }
@@ -57,6 +59,17 @@ public class TransacaoConcluidaModel {
     public TransacaoConcluidaModel setDetalhes(String detalhes) {
         this.detalhes = detalhes;
         return this;
+    }
+
+    @Override
+    public String toString() {
+        return "TransacaoConcluidaModel{" +
+                "transacao=" + transacao +
+                ", origem=" + origem +
+                ", destino=" + destino +
+                ", status=" + status +
+                ", detalhes='" + detalhes + '\'' +
+                '}';
     }
 }
 
