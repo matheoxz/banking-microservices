@@ -8,7 +8,6 @@ public class ExecucaoTransacaoModel {
     private UUID origem;
     private UUID destino;
     
-    // Explicit constructors
     public ExecucaoTransacaoModel() {}
 
     public ExecucaoTransacaoModel(UUID transacao, UUID origem, UUID destino) {
@@ -17,17 +16,33 @@ public class ExecucaoTransacaoModel {
         this.destino = destino;
     }
 
-    // Explicit getters
     public UUID getTransacao() { return transacao; }
 
     public UUID getOrigem() { return origem; }
 
     public UUID getDestino() { return destino; }
 
-    // Explicit setters
-    public void setTransacao(UUID transacao) { this.transacao = transacao; }
+    public ExecucaoTransacaoModel setTransacao(UUID transacao) {
+        this.transacao = transacao;
+        return this;
+    }
 
-    public void setOrigem(UUID origem) { this.origem = origem; }
+    public ExecucaoTransacaoModel setOrigem(UUID origem) {
+        this.origem = origem;
+        return this;
+    }
 
-    public void setDestino(UUID destino) { this.destino = destino; }
+    public ExecucaoTransacaoModel setDestino(UUID destino) {
+        this.destino = destino;
+        return this;
+    }
+
+    @Override
+    public String toString() {
+        return "ExecucaoTransacaoModel{" +
+                "transacao=" + transacao +
+                ", origem=" + origem +
+                ", destino=" + destino +
+                '}';
+    }
 }
