@@ -1,7 +1,7 @@
-package com.mthxz.account_service.messaging;
+package com.mthxz.notification_service.listener;
 
-import com.mthxz.account_service.service.ContaService;
 import com.mthxz.bankcommons.model.TransacaoConcluidaModel;
+import com.mthxz.notification_service.service.TransacaoConcluidaNotificator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,14 +15,14 @@ public class TransacaoConcluidaListener {
     private static final Logger logger = LoggerFactory.getLogger(TransacaoConcluidaListener.class);
 
     @Autowired
-    private ContaService contaService;
+    private TransacaoConcluidaNotificator notificator;
 
     @Async
-    @KafkaListener(topics = "TransacaoConcluida", groupId = "account-service-group")
+    @KafkaListener(topics = "TransacaoConcluida", groupId = "notification-service-group")
     public void listen(TransacaoConcluidaModel model) {
         logger.info("Received TransacaoConcluida message: {}", model.getTransacao());
         try {
-            contaService.executeTransaction(model);
+            notificator.enviar(model);
         } catch (Exception e) {
             logger.error("Failed to process TransacaoConcluida message", e);
         }

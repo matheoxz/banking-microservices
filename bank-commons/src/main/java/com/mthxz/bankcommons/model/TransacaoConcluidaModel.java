@@ -11,7 +11,12 @@ public class TransacaoConcluidaModel {
     private StatusTransacao status;
     private String detalhes;
 
-    public TransacaoConcluidaModel(UUID transacao, UUID origem, UUID destino, StatusTransacao statusTransacao, String s) {
+    public TransacaoConcluidaModel(UUID transacao, UUID origem, UUID destino, StatusTransacao statusTransacao, String detalhes) {
+        this.transacao = transacao;
+        this.origem = origem;
+        this.destino = destino;
+        this.status = statusTransacao;
+        this.detalhes = detalhes;
     }
 
     public TransacaoConcluidaModel() {}
