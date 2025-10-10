@@ -1,4 +1,4 @@
-package com.mthxz.notification_service.config;
+package com.mthxz.account_service.config;
 
 import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.clients.producer.ProducerConfig;
@@ -18,11 +18,9 @@ import java.util.Map;
 @Configuration
 public class KafkaConfig {
 
-
     @Value("${spring.kafka.bootstrap-servers}")
     private String bootstrapServers;
 
-    public static final String TOPIC_TRANSACAO_SOLICITADA = "TransacaoSolicitada";
     public static final String TOPIC_TRANSACAO_CONCLUIDA  = "TransacaoConcluida";
 
     @Bean
@@ -57,37 +55,9 @@ public class KafkaConfig {
         return factory;
     }
 
-    // Generic consumer factory for Object payloads
-    @Bean
-    public ConsumerFactory<String, Object> genericConsumerFactory() {
-        JsonDeserializer<Object> deserializer = new JsonDeserializer<>(Object.class);
-        // Trust bank commons models and any other needed packages
-        deserializer.addTrustedPackages("com.mthxz.bankcommons.model", "com.mthxz.bankcommons");
-        Map<String, Object> configsAttrs = new HashMap<>();
-        configsAttrs.put(org.apache.kafka.clients.consumer.ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
-        configsAttrs.put(org.apache.kafka.clients.consumer.ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
-        configsAttrs.put(org.apache.kafka.clients.consumer.ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, deserializer);
-        // Use same group for audit service
-        configsAttrs.put(org.apache.kafka.clients.consumer.ConsumerConfig.GROUP_ID_CONFIG, "audit-service");
-        return new DefaultKafkaConsumerFactory<>(configsAttrs, new StringDeserializer(), deserializer);
-    }
-
-    @Bean
-    public ConcurrentKafkaListenerContainerFactory<String, Object> genericListenerFactory() {
-        ConcurrentKafkaListenerContainerFactory<String, Object> factory = new ConcurrentKafkaListenerContainerFactory<>();
-        factory.setConsumerFactory(genericConsumerFactory());
-        return factory;
-    }
-
-    @Bean
-    public NewTopic transacaoSolicitadaTopic() {
-        return new NewTopic(TOPIC_TRANSACAO_SOLICITADA, 1, (short) 1);
-    }
-
     @Bean
     public NewTopic transacaoConcluidaTopic() {
         return new NewTopic(TOPIC_TRANSACAO_CONCLUIDA, 1, (short) 1);
     }
-
 }
 

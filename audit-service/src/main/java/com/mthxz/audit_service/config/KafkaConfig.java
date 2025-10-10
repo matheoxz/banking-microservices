@@ -55,6 +55,28 @@ public class KafkaConfig {
         factory.setConsumerFactory(consumerFactory());
         return factory;
     }
+    
+    // Generic consumer factory for Object payloads
+    @Bean
+    public ConsumerFactory<String, Object> genericConsumerFactory() {
+        JsonDeserializer<Object> deserializer = new JsonDeserializer<>(Object.class);
+        // Trust bank commons models and any other needed packages
+        deserializer.addTrustedPackages("com.mthxz.bankcommons.model", "com.mthxz.bankcommons");
+        Map<String, Object> configsAttrs = new HashMap<>();
+        configsAttrs.put(org.apache.kafka.clients.consumer.ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
+        configsAttrs.put(org.apache.kafka.clients.consumer.ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+        configsAttrs.put(org.apache.kafka.clients.consumer.ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, deserializer);
+        // Use same group for audit service
+        configsAttrs.put(org.apache.kafka.clients.consumer.ConsumerConfig.GROUP_ID_CONFIG, "audit-service");
+        return new DefaultKafkaConsumerFactory<>(configsAttrs, new StringDeserializer(), deserializer);
+    }
+
+    @Bean
+    public ConcurrentKafkaListenerContainerFactory<String, Object> genericListenerFactory() {
+        ConcurrentKafkaListenerContainerFactory<String, Object> factory = new ConcurrentKafkaListenerContainerFactory<>();
+        factory.setConsumerFactory(genericConsumerFactory());
+        return factory;
+    }
 
     @Bean
     public NewTopic transacaoSolicitadaTopic() {
