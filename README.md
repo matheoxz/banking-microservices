@@ -22,41 +22,7 @@ Componentes Principais:
 
 Um diagrama PlantUML mostrando as interações entre os serviços está disponível em:
 
-```plantuml
-package "Tópicos" {
-  queue TransacaoSolicitada <<Fila>>
-
-  queue TransacaoConcluida <<Fila>>
-}
-
-actor "Cliente" as Cliente
-
-database "PostgreSQL DB" as DB <<Banco de Dados>>
-
-package "Serviços" {
-  component "Serviço de Transação\n\n--\nPOST /solicitar" as TS <<Serviço>>
-  component "Serviço de Conta\n\n--\nPOST /registro/cliente" as AS <<Serviço>>
-  component "Serviço de Auditoria" as AuS <<Serviço>>
-  component "Serviço de Notificação" as NS <<Serviço>>
-}
-
-TS --> DB : grava transações
-AS --> DB : atualiza saldos de contas,\n cria contas
-
-TS --> TransacaoSolicitada : "             "
-TS --> TransacaoConcluida: "     "
-
-TransacaoSolicitada --> TS: "        "
-TransacaoConcluida --> AS
-TransacaoConcluida --> AuS
-TransacaoSolicitada --> AuS
-TransacaoConcluida --> NS
-
-Cliente --> TS : POST /solicitar
-
-AuS --> DB : salva auditoria
-NS --> DB : lê dados de conta
-```
+![](/docs/services_architecture.png)
 
 ## Pré-requisitos
 
