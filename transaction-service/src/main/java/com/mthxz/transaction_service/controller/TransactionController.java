@@ -8,6 +8,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.UUID;
+
+import static java.util.Objects.isNull;
+
 @RestController
 public class TransactionController {
 
@@ -18,13 +22,13 @@ public class TransactionController {
     }
 
     @PostMapping("/solicitar")
-    public ResponseEntity<Void> solicitar(@RequestBody SolicitacaoTransacaoModel solicitacao) {
-        var ok = newTransactionService.solicitaTransacao(new TransacaoRequestModel()
+    public ResponseEntity<UUID> solicitar(@RequestBody SolicitacaoTransacaoModel solicitacao) {
+        var transaction = newTransactionService.solicitaTransacao(new TransacaoRequestModel()
                         .setTipo(solicitacao.getTipo())
                         .setValor(solicitacao.getValor())
                         .setOrigem(solicitacao.getOrigem())
                         .setDestino(solicitacao.getDestino())
         );
-        return ok ? ResponseEntity.ok().build() : ResponseEntity.internalServerError().build();
+        return !isNull(transaction) ? ResponseEntity.ok(transaction) : ResponseEntity.internalServerError().build();
     }
 }

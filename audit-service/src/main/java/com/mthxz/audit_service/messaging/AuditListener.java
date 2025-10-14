@@ -1,4 +1,4 @@
-package com.mthxz.audit_service.listener;
+package com.mthxz.audit_service.messaging;
 
 import com.mthxz.audit_service.service.AuditoriaService;
 import com.mthxz.audit_service.config.KafkaConfig;

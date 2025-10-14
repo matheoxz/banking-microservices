@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 
 @Service
@@ -38,7 +39,7 @@ public class NewTransactionServiceImpl implements NewTransactionService {
 
     @Override
     @Transactional
-    public boolean solicitaTransacao(TransacaoRequestModel transacao) {
+    public UUID solicitaTransacao(TransacaoRequestModel transacao) {
         try {
             var entity = new TransacaoEntity()
                     .setTipo(transacao.getTipo())
@@ -52,14 +53,13 @@ public class NewTransactionServiceImpl implements NewTransactionService {
             var exec = new ExecucaoTransacaoModel(savedTransaction.getId(), entity.getOrigem(), entity.getDestino());
 
             kafkaTemplate.send(KafkaConfig.TOPIC_TRANSACAO_SOLICITADA, exec).get();
+            return savedTransaction.getId();
         } catch (DataAccessException e) {
             log.error("[ERROR] [DATABASE] error: {}", e.getMessage());
-            return false;
         } catch (ExecutionException | InterruptedException e) {
             log.error("[ERROR] [KAFKA] error: {}", e.getMessage());
-            return false;
         }
-        return true;
+        return null;
     }
 
     @Override
