@@ -1,0 +1,79 @@
+@startuml
+left to right direction
+
+skinparam componentStyle rectangle
+skinparam backgroundColor transparent
+skinparam defaultFontColor #FFFFFF
+skinparam shadowing false
+
+skinparam ArrowColor #FFFFFF
+
+skinparam Rectangle {
+  BackgroundColor #3E3E3E
+  BorderColor #FFFFFF
+}
+
+skinparam component {
+  BackgroundColor #3E3E3E
+  BorderColor #FFFFFF
+  FontColor #FFFFFF
+}
+
+skinparam database {
+  BackgroundColor #4E4E4E
+  BorderColor #FFFFFF
+  FontColor #FFFFFF
+}
+
+skinparam queue {
+  BackgroundColor #5E5E5E
+  BorderColor #FFFFFF
+  FontColor #FFFFFF
+}
+
+skinparam actor {
+  BackgroundColor #FFFFFF
+  BorderColor #FFFFFF
+  FontColor #FFFFFF
+}
+
+
+package "Tópicos" {
+  queue TransacaoSolicitada <<Fila>>
+
+  queue TransacaoConcluida <<Fila>>
+}
+
+actor "Cliente" as Cliente
+
+
+database "PostgreSQL DB" as DB <<Banco de Dados>>
+
+package "Serviços" {
+  component "Serviço de Transação\n\n--\nPOST /solicitar" as TS <<Serviço>>
+  component "Serviço de Conta\n\n--\nPOST /registro/cliente" as AS <<Serviço>>
+  component "Serviço de Auditoria" as AuS <<Serviço>>
+  component "Serviço de Notificação" as NS <<Serviço>>
+}
+
+' Services interacting with database
+TS --> DB : grava transações
+AS --> DB : atualiza saldos de contas,\n cria contas
+
+' Kafka interactions
+TS --> TransacaoSolicitada : "             "
+TS --> TransacaoConcluida: "     "
+
+TransacaoSolicitada --> TS: "        "
+TransacaoConcluida --> AS
+TransacaoConcluida --> AuS
+TransacaoSolicitada --> AuS
+TransacaoConcluida --> NS
+
+Cliente --> TS : POST /solicitar
+
+' Audit and Notification
+AuS --> DB : salva auditoria
+NS --> DB : lê dados de conta
+
+@enduml

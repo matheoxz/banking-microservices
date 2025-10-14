@@ -1,4 +1,4 @@
-package com.mthxz.notification_service.listener;
+package com.mthxz.notification_service.messaging;
 
 import com.mthxz.bankcommons.model.TransacaoConcluidaModel;
 import com.mthxz.notification_service.service.TransacaoConcluidaNotificator;
