@@ -20,8 +20,6 @@ Componentes Principais:
 
 ## Diagrama UML
 
-Um diagrama PlantUML mostrando as interações entre os serviços está disponível em:
-
 ![](/docs/services_architecture.png)
 
 ## Pré-requisitos
